@@ -81,8 +81,9 @@ class Individuo():
 
 class AlgoritmoGenetico():
 
-    def __init__(self, tamanho_populacao):
+    def __init__(self, tamanho_populacao, objetivo):
         self.tamanho_populacao = tamanho_populacao
+        self.objetivo = objetivo
         self.populacao = []
         self.geracao = 0
         self.melhor_solucao = 0
@@ -92,20 +93,49 @@ class AlgoritmoGenetico():
             self.populacao.append(Individuo(minimos, maximos))
         self.melhor_solucao = self.populacao[0]
 
-    def ordena_populacao(self, objetivo='maximizar'):
+    def ordena_populacao(self):
         # AQUI DEVE ENTRAR SE É MINIMIZAÇÃO OU MAXIMIZAÇÃO (objetivo deverá ser um input)
 
-        if objetivo == 'maximizar':
+        if self.objetivo == 'maximizar':
             reverse = True
         else:
             reverse = False
-
         self.populacao = sorted(self.populacao,
                                 key=lambda populacao: populacao.nota_avaliacao,
                                 reverse=reverse)
 
-        # HÁ ALTERAÇÃO NOS VALORES, MAS AINDA NÃO ENTENDO SE ESTÁ BOM OU NÃO :/
-        # AINDA A MELHOR SOLUÇÃO NÃO É O MENOR NÚMERO
+    def melhor_individuo(self, individuo):
+
+        if self.objetivo == 'maximizar':
+            if individuo.nota_avaliacao > self.melhor_solucao.nota_avaliacao:
+                self.melhor_solucao = individuo
+        else:
+            if individuo.nota_avaliacao < self.melhor_solucao.nota_avaliacao:
+                self.melhor_solucao = individuo
+
+    def soma_avaliacoes(self):
+        '''xxxx'''
+
+        soma = 0
+        for individuo in self.populacao:
+            soma += individuo.nota_avaliacao
+
+        return soma
+
+    def seleciona_pai(self, soma_avaliacao):
+        """Seleção dos indivíduos - método Roleta Viciada.
+        Testar outras formas melhores de selecionar os pais"""
+
+        pai = -1
+        valor_sorteado = random() * soma_avaliacao
+        soma = 0
+        i = 0
+        while i < len(self.populacao) and soma < valor_sorteado:
+            soma += self.populacao[i].nota_avaliacao
+            pai += 1
+            i += 1
+
+        return pai
 
 
 if __name__ == '__main__':
@@ -130,28 +160,32 @@ if __name__ == '__main__':
     # print(minimo)
     # print(maximo)
 
-    print("Individuo 1")
-    individuo1 = Individuo(minimo, maximo)
-    # print(f"Minimos {individuo1.minimos}")
-    # print(f"Máximos {individuo1.maximos}")
-    # print(f"Geração {individuo1.geracao}")
-    # cromossomo aqui significa (altura, largura, comprimento)
-    print(f"Cromossomo {individuo1.cromossomo}")
+    tamanho_populacao = 20
+    objetivo = 'maximizar'
 
-    individuo1.avaliacao()
-    print(f"Nota: {individuo1.nota_avaliacao}\n")
+    ag = AlgoritmoGenetico(tamanho_populacao, objetivo)
+    ag.inicializa_populacao(minimo, maximo)
+    # preenche as notas para cada individuo
+    for individuo in ag.populacao:
+        individuo.avaliacao()
+    # ordena a lista pela nota
+    ag.ordena_populacao()
+    # monstra qual o melhor individuo
+    ag.melhor_individuo(ag.populacao[0])
+    for i in range(ag.tamanho_populacao):
+        print(f"\n******* Individuo {i} *******",
+              "\nCromossomo %s" % str(ag.populacao[i].cromossomo),
+              "\nNota %s" % ag.populacao[i].nota_avaliacao)
 
-    print("Individuo 2")
-    individuo2 = Individuo(minimo, maximo)
-    # cromossomo aqui significa (altura, largura, comprimento)
-    print(f"Cromossomo {individuo2.cromossomo}")
+    print(f"\nMelhor solução: %s" % ag.melhor_solucao.cromossomo,
+          "Melhor nota: %s" % ag.melhor_solucao.nota_avaliacao)
 
-    individuo2.avaliacao()
-    print(f"Nota: {individuo2.nota_avaliacao}\n")
+    soma = ag.soma_avaliacoes()
+    print(f"Soma das avaliações: {soma}")
 
-    # testando crossover
-    individuo1.crossover(individuo2)
-
-    # testando mutação
-    individuo1.mutacao(0.5, minimo, maximo)
-    individuo2.mutacao(0.5, minimo, maximo)
+    for individuos_gerados in range(0, ag.tamanho_populacao, 2):
+        pai1 = ag.seleciona_pai(soma)  # individuos_gerados
+        # print(f"Pai 1: {pai1}")
+        pai2 = ag.seleciona_pai(soma)
+        # print(f"Pai 2: {pai1}")
+    print(f"Pai 1: {pai1} | Pai 2 {pai2}")
