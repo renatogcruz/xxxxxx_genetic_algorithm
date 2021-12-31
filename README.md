@@ -1,14 +1,16 @@
 # Caramel Dog
 
 
-# Característica
+### Característica
 
 De forma geral os vira-latas costumam ser muito inteligentes e aprendem rápido. (falar do GA)
 
-# Adaptável
+### Adaptável
 
 O vira-lata é extremamente adptável. Vc pode baixa-lo, modifica-lo, etc (falar sobre open-source)
 
-# Testes de desempenho
+### Testes de desempenho
 
 #
+
+Sobre [vira-latas](https://pt.wikipedia.org/wiki/Vira-lata)
