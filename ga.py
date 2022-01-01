@@ -62,7 +62,7 @@ class Individuo():
     def mutacao(self, taxa_mutacao, minimos, maximos):
         """Determina a mutação dos cromossomos"""
 
-        print(f"Antes: {self.cromossomo}")
+        # print(f"Antes: {self.cromossomo}")
 
         for i in range(len(self.cromossomo)):
             if random() < taxa_mutacao:
@@ -71,7 +71,7 @@ class Individuo():
                         minimos[i], maximos[i])  # instance
                 else:
                     self.cromossomo[i] = randint(minimos[i], maximos[i])
-        print(f"Depois: {self.cromossomo}")
+        # print(f"Depois: {self.cromossomo}")
 
         return self
 
@@ -84,6 +84,8 @@ class AlgoritmoGenetico():
     def __init__(self, tamanho_populacao, objetivo):
         self.tamanho_populacao = tamanho_populacao
         self.objetivo = objetivo
+        # self.minimo = minimo
+        # self.maximo = maximo
         self.populacao = []
         self.geracao = 0
         self.melhor_solucao = 0
@@ -137,6 +139,68 @@ class AlgoritmoGenetico():
 
         return pai
 
+    def visualiza_geracao(self):
+
+        for i in range(ag.tamanho_populacao):
+            cromossomo = str(self.populacao[i].cromossomo)
+            nota = self.populacao[i].nota_avaliacao
+
+            id = self.populacao[0].geracao + i
+
+            print(f"\n******* Individuo {id} *******")
+            print(f"Cromossomo: {cromossomo}")
+            print(f"Nota: {nota}\n")
+
+        melhor = self.populacao[0]
+        print(
+            f"\nG: {self.populacao[0].geracao} | Cromossomo: {melhor.cromossomo}")
+
+        return cromossomo, nota
+
+    def resolver(self, taxa_mutacao, numero_geracoes, minimo, maximo):
+
+        # aqui estamos criando a primeira populacao
+        self.inicializa_populacao(minimo, maximo)
+        for individuo in self.populacao:
+            individuo.avaliacao()
+
+        self.ordena_populacao()
+
+        self.visualiza_geracao()
+
+        # Aqui estamos executando as repetições
+        for geracao in range(numero_geracoes):
+            soma_avaliacao = self.soma_avaliacoes()
+            nova_populacao = []
+
+            for individuos_gerados in range(0, self.tamanho_populacao, 2):
+                pai1 = self.seleciona_pai(soma_avaliacao)
+                pai2 = self.seleciona_pai(soma_avaliacao)
+
+                filhos = self.populacao[pai1].crossover(self.populacao[pai2])
+
+                nova_populacao.append(filhos[0].mutacao(
+                    taxa_mutacao, minimo, maximo))
+                nova_populacao.append(filhos[1].mutacao(
+                    taxa_mutacao, minimo, maximo))
+
+            self.populacao = list(nova_populacao)
+
+            for individuo in self.populacao:
+                individuo.avaliacao()
+
+            self.ordena_populacao()
+
+            self.visualiza_geracao()
+
+            melhor = self.populacao[0]
+            self.melhor_individuo(melhor)
+
+        print(f"\nMelhor solução: %s" % self.melhor_solucao.cromossomo,
+              "Melhor nota: %s" % self.melhor_solucao.nota_avaliacao)
+
+        return self.melhor_solucao.cromossomo
+
 
 if __name__ == '__main__':
     lista_parametros = []
@@ -144,6 +208,8 @@ if __name__ == '__main__':
     lista_parametros.append(Parametro('altura', 2, 10))
     lista_parametros.append(Parametro('largura', 5, 10))
     lista_parametros.append(Parametro('comprimento', 2, 20))
+    lista_parametros.append(Parametro('perfilA', 10, 1000))
+    lista_parametros.append(Parametro('perfilB', 2, 5000))
 
     # for parametro in lista_parametros:
     #     print(parametro.nome)
@@ -151,41 +217,63 @@ if __name__ == '__main__':
     nome = []
     minimo = []
     maximo = []
+
     for parametro in lista_parametros:
         nome.append(parametro.nome)
         minimo.append(parametro.minimo)
         maximo.append(parametro.maximo)
 
-    # print(nome)
-    # print(minimo)
-    # print(maximo)
-
     tamanho_populacao = 20
     objetivo = 'maximizar'
+    taxa_mutacao = 0.05
+    numero_geracoes = 100
 
     ag = AlgoritmoGenetico(tamanho_populacao, objetivo)
-    ag.inicializa_populacao(minimo, maximo)
-    # preenche as notas para cada individuo
-    for individuo in ag.populacao:
-        individuo.avaliacao()
-    # ordena a lista pela nota
-    ag.ordena_populacao()
-    # monstra qual o melhor individuo
-    ag.melhor_individuo(ag.populacao[0])
-    for i in range(ag.tamanho_populacao):
-        print(f"\n******* Individuo {i} *******",
-              "\nCromossomo %s" % str(ag.populacao[i].cromossomo),
-              "\nNota %s" % ag.populacao[i].nota_avaliacao)
 
-    print(f"\nMelhor solução: %s" % ag.melhor_solucao.cromossomo,
-          "Melhor nota: %s" % ag.melhor_solucao.nota_avaliacao)
+    resultado = ag.resolver(taxa_mutacao, numero_geracoes, minimo, maximo)
 
-    soma = ag.soma_avaliacoes()
-    print(f"Soma das avaliações: {soma}")
+    # #################################### #
+    # ag.inicializa_populacao(minimo, maximo)
+    # # preenche as notas para cada individuo
+    # for individuo in ag.populacao:
+    #     individuo.avaliacao()
+    # # ordena a lista pela nota
+    # ag.ordena_populacao()
+    # # monstra qual o melhor individuo
+    # ag.melhor_individuo(ag.populacao[0])
+    # for i in range(ag.tamanho_populacao):
+    #     print(f"\n******* Individuo {i} *******",
+    #           "\nCromossomo %s" % str(ag.populacao[i].cromossomo),
+    #           "\nNota %s" % ag.populacao[i].nota_avaliacao)
 
-    for individuos_gerados in range(0, ag.tamanho_populacao, 2):
-        pai1 = ag.seleciona_pai(soma)  # individuos_gerados
-        # print(f"Pai 1: {pai1}")
-        pai2 = ag.seleciona_pai(soma)
-        # print(f"Pai 2: {pai1}")
-    print(f"Pai 1: {pai1} | Pai 2 {pai2}")
+    # # print(f"\nMelhor solução: %s" % ag.melhor_solucao.cromossomo,
+    # #       "Melhor nota: %s" % ag.melhor_solucao.nota_avaliacao)
+
+    # soma = ag.soma_avaliacoes()
+    # print(f"Soma das avaliações: {soma}")
+
+    # nova_populacao = []
+    # probabilidade_mutacao = 0.05
+
+    # for individuos_gerados in range(0, ag.tamanho_populacao, 2):
+    #     pai1 = ag.seleciona_pai(soma)  # individuos_gerados
+    #     pai2 = ag.seleciona_pai(soma)
+
+    #     # filhos recebe uma lista de novos individuos
+    #     filhos = ag.populacao[pai1].crossover(ag.populacao[pai2])
+    #     nova_populacao.append(filhos[0].mutacao(
+    #         probabilidade_mutacao, minimo, maximo))
+    #     nova_populacao.append(filhos[1].mutacao(
+    #         probabilidade_mutacao, minimo, maximo))
+
+    # ag.populacao = list(nova_populacao)
+    # # print(f"Pai 1: {pai1} | Pai 2 {pai2}")
+
+    # for individuo in ag.populacao:
+    #     individuo.avaliacao()
+    # ag.ordena_populacao()
+    # ag.melhor_individuo(ag.populacao[0])
+    # soma = ag.soma_avaliacoes()
+
+    # print(f"\nMelhor solução: %s" % ag.melhor_solucao.cromossomo,
+    #       "Melhor nota: %s" % ag.melhor_solucao.nota_avaliacao)
