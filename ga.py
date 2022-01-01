@@ -157,35 +157,13 @@ class AlgoritmoGenetico():
 
         return cromossomo, nota
 
-    def resolver(self, taxa_mutacao, numero_geracoes, minimo, maximo):
+    def resolver(self, taxa_mutacao, numero_geracoes, minimo, maximo, run):
+        '''Função que efetivamente resolve o problema'''
 
-        # aqui estamos criando a primeira populacao
-        self.inicializa_populacao(minimo, maximo)
-        for individuo in self.populacao:
-            individuo.avaliacao()
+        if run == False:
 
-        self.ordena_populacao()
-
-        self.visualiza_geracao()
-
-        # Aqui estamos executando as repetições
-        for geracao in range(numero_geracoes):
-            soma_avaliacao = self.soma_avaliacoes()
-            nova_populacao = []
-
-            for individuos_gerados in range(0, self.tamanho_populacao, 2):
-                pai1 = self.seleciona_pai(soma_avaliacao)
-                pai2 = self.seleciona_pai(soma_avaliacao)
-
-                filhos = self.populacao[pai1].crossover(self.populacao[pai2])
-
-                nova_populacao.append(filhos[0].mutacao(
-                    taxa_mutacao, minimo, maximo))
-                nova_populacao.append(filhos[1].mutacao(
-                    taxa_mutacao, minimo, maximo))
-
-            self.populacao = list(nova_populacao)
-
+            # aqui estamos criando a primeira populacao
+            self.inicializa_populacao(minimo, maximo)
             for individuo in self.populacao:
                 individuo.avaliacao()
 
@@ -193,11 +171,47 @@ class AlgoritmoGenetico():
 
             self.visualiza_geracao()
 
-            melhor = self.populacao[0]
-            self.melhor_individuo(melhor)
+        else:
 
-        print(f"\nMelhor solução: %s" % self.melhor_solucao.cromossomo,
-              "Melhor nota: %s" % self.melhor_solucao.nota_avaliacao)
+            self.inicializa_populacao(minimo, maximo)
+            for individuo in self.populacao:
+                individuo.avaliacao()
+
+            self.ordena_populacao()
+
+            self.visualiza_geracao()
+
+            # Aqui estamos executando as repetições
+            for geracao in range(numero_geracoes):
+                soma_avaliacao = self.soma_avaliacoes()
+                nova_populacao = []
+
+                for individuos_gerados in range(0, self.tamanho_populacao, 2):
+                    pai1 = self.seleciona_pai(soma_avaliacao)
+                    pai2 = self.seleciona_pai(soma_avaliacao)
+
+                    filhos = self.populacao[pai1].crossover(
+                        self.populacao[pai2])
+
+                    nova_populacao.append(filhos[0].mutacao(
+                        taxa_mutacao, minimo, maximo))
+                    nova_populacao.append(filhos[1].mutacao(
+                        taxa_mutacao, minimo, maximo))
+
+                self.populacao = list(nova_populacao)
+
+                for individuo in self.populacao:
+                    individuo.avaliacao()
+
+                self.ordena_populacao()
+
+                self.visualiza_geracao()
+
+                melhor = self.populacao[0]
+                self.melhor_individuo(melhor)
+
+            print(f"\nMelhor solução: %s" % self.melhor_solucao.cromossomo,
+                  "Melhor nota: %s" % self.melhor_solucao.nota_avaliacao)
 
         return self.melhor_solucao.cromossomo
 
@@ -230,7 +244,11 @@ if __name__ == '__main__':
 
     ag = AlgoritmoGenetico(tamanho_populacao, objetivo)
 
-    resultado = ag.resolver(taxa_mutacao, numero_geracoes, minimo, maximo)
+    # False é para cuspir os inputs no Grasshopper
+    # True é para efetivamente executar o GA
+    run = True
+
+    resultado = ag.resolver(taxa_mutacao, numero_geracoes, minimo, maximo, run)
 
     # #################################### #
     # ag.inicializa_populacao(minimo, maximo)
