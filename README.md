@@ -1,16 +1,16 @@
-# Caramel Dog
+# Caramel Xxx
 
 
 ### Característica
 
-De forma geral os vira-latas caramelos costumam ser muito inteligentes e aprendem rápido. (falar do GA)
+De forma geral os xxxx-xaxas xaxaxxxxx costumam ser muito inteligentes e aprendem rápido. (falar do GA)
 
 ### Adaptável
 
-O vira-lata caramelo é extremamente adptável. Vc pode baixa-lo, modifica-lo, etc (falar sobre open-source)
+O xxxa-xaxa xaxaxxxx é extremamente adptável. Vc pode baixa-lo, modifica-lo, etc (falar sobre open-source)
 
 ### Testes de desempenho
 
 #
 
-Sobre [vira-latas](https://pt.wikipedia.org/wiki/Vira-lata)
+
